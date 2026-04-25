@@ -1,0 +1,670 @@
+{
+  "info": {
+    "_postman_id": "3dd02926-1809-4044-b914-6c2908d80897",
+    "name": "assignment 7",
+    "description": "## Assignment 7 — Express + Sequelize (MySQL) API\n\n**Suggested execution order:**\n1. **Sign Up User** → sets `userId`, `email`\n2. **Create Post** → sets `postId`\n3. **Bulk Create Comments** → sets `commentId`\n4. All GET / PATCH / DELETE requests can then run with populated variables\n\n**Collection Variables:** `baseUrl`, `userId`, `postId`, `commentId`, `email`",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "25064023",
+    "_collection_link": "https://go.postman.co/collection/25064023-3dd02926-1809-4044-b914-6c2908d80897?source=collection_link"
+  },
+  "item": [
+    {
+      "name": "Users",
+      "item": [
+        {
+          "name": "Sign Up User",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 201', () => pm.response.to.have.status(201))",
+                  "",
+                  "pm.test('User has id', () => pm.expect(json).to.have.property('id'))"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"name\":\"Mohamed Waleed\",\"email\":\"mohamed@example.com\",\"password\":\"secret123\",\"role\":\"user\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/users/signup",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "users",
+                "signup"
+              ]
+            },
+            "description": "Generated from cURL: curl -X POST {{baseUrl}}/users/signup -H \"Content-Type: application/json\" -d '{\"name\":\"Mohamed Waleed\",\"email\":\"mohamed@example.com\",\"password\":\"secret123\",\"role\":\"user\"}'"
+          },
+          "response": []
+        },
+        {
+          "name": "Upsert User by PK",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200 or 201', () => {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([",
+                  "        200,",
+                  "        201",
+                  "    ]);",
+                  "})"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"name\":\"Mohamed Updated\",\"email\":\"mohamed@example.com\",\"password\":\"newpassword\",\"role\":\"admin\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/users/{{userId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "users",
+                "{{userId}}"
+              ]
+            },
+            "description": "Generated from cURL: curl -X PUT {{baseUrl}}/users/{{userId}} -H \"Content-Type: application/json\" -d '{\"name\":\"Mohamed Updated\",\"email\":\"mohamed@example.com\",\"password\":\"newpassword\",\"role\":\"admin\"}'"
+          },
+          "response": []
+        },
+        {
+          "name": "Find User by Email",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200))",
+                  "",
+                  "pm.test('Email matches', () => pm.expect(json.email).to.eql(pm.collectionVariables.get('email')))"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/users/by-email?email={{email}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "users",
+                "by-email"
+              ],
+              "query": [
+                {
+                  "key": "email",
+                  "value": "{{email}}"
+                }
+              ]
+            },
+            "description": "Generated from cURL: curl -X GET \"{{baseUrl}}/users/by-email?email={{email}}\""
+          },
+          "response": []
+        },
+        {
+          "name": "Get User by PK (no role)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200))",
+                  "",
+                  "pm.test('Role is excluded', () => pm.expect(json).to.not.have.property('role'))"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/users/{{userId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "users",
+                "{{userId}}"
+              ]
+            },
+            "description": "Generated from cURL: curl -X GET {{baseUrl}}/users/{{userId}}"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Posts",
+      "item": [
+        {
+          "name": "Create Post",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 201', () => pm.response.to.have.status(201))",
+                  "",
+                  "pm.test('Post has id', () => pm.expect(json).to.have.property('id'))"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"title\":\"My First Post\",\"content\":\"This is the content of my first post.\",\"userId\":\"{{userId}}\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/posts",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "posts"
+              ]
+            },
+            "description": "Generated from cURL: curl -X POST {{baseUrl}}/posts -H \"Content-Type: application/json\" -d '{\"title\":\"My First Post\",\"content\":\"This is the content of my first post.\",\"userId\":\"{{userId}}\"}'"
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Post (owner check)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200 or 204', () => {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([",
+                  "        200,",
+                  "        204",
+                  "    ]);",
+                  "})"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"userId\":\"{{userId}}\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/posts/{{postId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "posts",
+                "{{postId}}"
+              ]
+            },
+            "description": "Generated from cURL: curl -X DELETE {{baseUrl}}/posts/{{postId}} -H \"Content-Type: application/json\" -d '{\"userId\":\"{{userId}}\"}'"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Posts with User & Comments",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200))",
+                  "",
+                  "pm.test('Response is array', () => pm.expect(json).to.be.an('array'))",
+                  "",
+                  "pm.test('Post has id and title', () => {",
+                  "    if (json.length > 0) {",
+                  "        pm.expect(json[0]).to.have.property('id');",
+                  "        pm.expect(json[0]).to.have.property('title');",
+                  "    }",
+                  "})"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/posts/details",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "posts",
+                "details"
+              ]
+            },
+            "description": "Generated from cURL: curl -X GET {{baseUrl}}/posts/details"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Posts with Comment Count",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200))",
+                  "",
+                  "pm.test('Response is array', () => pm.expect(json).to.be.an('array'))",
+                  "",
+                  "pm.test('Each post has commentCount', () => {",
+                  "    if (json.length > 0) {",
+                  "        pm.expect(json[0]).to.have.property('commentCount');",
+                  "    }",
+                  "})"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/posts/comment-count",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "posts",
+                "comment-count"
+              ]
+            },
+            "description": "Generated from cURL: curl -X GET {{baseUrl}}/posts/comment-count"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Comments",
+      "item": [
+        {
+          "name": "Bulk Create Comments",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 201', () => pm.response.to.have.status(201))",
+                  "",
+                  "pm.test('Returns array of comments', () => pm.expect(json).to.be.an('array'))"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"comments\":[{\"content\":\"Great post!\",\"postId\":\"{{postId}}\",\"userId\":\"{{userId}}\"},{\"content\":\"Very informative.\",\"postId\":\"{{postId}}\",\"userId\":\"{{userId}}\"}]}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/comments",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "comments"
+              ]
+            },
+            "description": "Generated from cURL: curl -X POST {{baseUrl}}/comments -H \"Content-Type: application/json\" -d '{\"comments\":[{\"content\":\"Great post!\",\"postId\":\"{{postId}}\",\"userId\":\"{{userId}}\"},{\"content\":\"Very informative.\",\"postId\":\"{{postId}}\",\"userId\":\"{{userId}}\"}]}'"
+          },
+          "response": []
+        },
+        {
+          "name": "Update Comment (owner check)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200))",
+                  "",
+                  "pm.test('Content was updated', () => pm.expect(json.content).to.eql('Updated comment content'))"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"userId\":\"{{userId}}\",\"content\":\"Updated comment content\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/comments/{{commentId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "comments",
+                "{{commentId}}"
+              ]
+            },
+            "description": "Generated from cURL: curl -X PATCH {{baseUrl}}/comments/{{commentId}} -H \"Content-Type: application/json\" -d '{\"userId\":\"{{userId}}\",\"content\":\"Updated comment content\"}'"
+          },
+          "response": []
+        },
+        {
+          "name": "Find or Create Comment",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200 or 201', () => {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([",
+                  "        200,",
+                  "        201",
+                  "    ]);",
+                  "})",
+                  "",
+                  "pm.test('Has comment data', () => pm.expect(json).to.have.property('id'))"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"postId\":\"{{postId}}\",\"userId\":\"{{userId}}\",\"content\":\"This is a unique comment\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/comments/find-or-create",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "comments",
+                "find-or-create"
+              ]
+            },
+            "description": "Generated from cURL: curl -X POST {{baseUrl}}/comments/find-or-create -H \"Content-Type: application/json\" -d '{\"postId\":\"{{postId}}\",\"userId\":\"{{userId}}\",\"content\":\"This is a unique comment\"}'"
+          },
+          "response": []
+        },
+        {
+          "name": "Search Comments by Word",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200))",
+                  "",
+                  "pm.test('Has count and results', () => {",
+                  "    pm.expect(json).to.have.property('count');",
+                  "    pm.expect(json).to.have.property('rows');",
+                  "})"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/comments/search?word=great",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "comments",
+                "search"
+              ],
+              "query": [
+                {
+                  "key": "word",
+                  "value": "great"
+                }
+              ]
+            },
+            "description": "Generated from cURL: curl -X GET \"{{baseUrl}}/comments/search?word=great\""
+          },
+          "response": []
+        },
+        {
+          "name": "Get Newest 3 Comments for Post",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200))",
+                  "",
+                  "pm.test('Returns at most 3 comments', () => pm.expect(json.length).to.be.at.most(3))"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/comments/newest/{{postId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "comments",
+                "newest",
+                "{{postId}}"
+              ]
+            },
+            "description": "Generated from cURL: curl -X GET {{baseUrl}}/comments/newest/{{postId}}"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Comment Details (with User & Post)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200))",
+                  "",
+                  "pm.test('Has user relation', () => pm.expect(json).to.have.property('User'))",
+                  "",
+                  "pm.test('Has post relation', () => pm.expect(json).to.have.property('Post'))"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/comments/details/{{commentId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "comments",
+                "details",
+                "{{commentId}}"
+              ]
+            },
+            "description": "Generated from cURL: curl -X GET {{baseUrl}}/comments/details/{{commentId}}"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Health",
+      "item": [
+        {
+          "name": "Health Check",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200))"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/health",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "health"
+              ]
+            },
+            "description": "Generated from cURL: curl -X GET {{baseUrl}}/health"
+          },
+          "response": []
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": ""
+    },
+    {
+      "key": "userId",
+      "value": ""
+    },
+    {
+      "key": "postId",
+      "value": ""
+    },
+    {
+      "key": "commentId",
+      "value": ""
+    },
+    {
+      "key": "email",
+      "value": ""
+    }
+  ]
+}
